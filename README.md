@@ -67,6 +67,24 @@ A lightweight, browser-based PYQ and mock-test platform that brings previous-yea
 
 ---
 
+## Question tutor API
+
+`POST /api/questions/{questionId}/tutor` accepts a Supabase question UUID, the signed-in student's access token in `Authorization: Bearer <access_token>`, and an `application/json` body with one field.
+
+```json
+{ "message": "Why do we divide by the mass in this step?" }
+```
+
+The route loads the published stem, options and current verified solution under the student's database permissions. Each request is independent. Send the student's current doubt. A successful response includes `questionId`, `questionRevision`, `disposition`, `reply` and `citations`. Citation IDs refer to `answer` or to the blank-line-separated paragraphs of the current worked solution, starting at `solution-1`. Render replies as plain text. The server substitutes a fixed message for off-topic classifications or insufficient evidence.
+
+For local development, copy `.env.example` to `.env.local` and fill in the Supabase project URL, its publishable key and the server's OpenAI API key. A legacy Supabase anon key is also accepted through `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Keep the OpenAI key in the server environment. Fresh Supabase projects need both SQL migrations in timestamp order. On projects provisioned through the SQL Editor, check the existing objects and record already-applied versions in the CLI migration history before using `supabase db push`.
+
+The pilot allows 20 requests per signed-in, non-anonymous student per UTC day. Quota is reserved once a usable solution is found and counts attempted OpenAI calls, including refusals and provider failures. Signed-out requests return 401. Unavailable questions return 404, missing current solutions return 409, questions with media or unsupported text return 422, and an exhausted allowance returns 429. The tutor uses GPT-4o-mini. Each answer must reference a known passage. Semantic relevance is still a model judgment.
+
+The [pilot SQL](supabase/seeds/tutor_pilot.sql) inserts an attributed adaptation of JEE Advanced 2025 Paper 1 Mathematics Q10 and its worked solution. The question UUID is `e6735659-65fc-5618-b6b3-b5c9ab30e52d`. To try the tutor, ask “Why do we subtract 150?” The fourth solution paragraph explains the double count.
+
+Run `node --test tests/tutor.test.cjs` for the offline route checks and `npm run build` to verify the production route. For a live check, send a request using an authenticated student session and a published question with its current verified solution.
+
 ## Overview
 
 **JeeHub** is an exam-practice platform built to make previous-year questions and full examination papers easier to find and attempt.
