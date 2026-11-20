@@ -1,0 +1,32 @@
+{
+  "archiveRecords": 23064,
+  "paperSets": 268,
+  "archiveRecordsByExam": {
+    "AIEEE": 1359,
+    "AIPMT": 3005,
+    "BITSAT": 778,
+    "COMEDK": 174,
+    "IIT-JEE": 600,
+    "JEE Advanced": 1457,
+    "JEE Main": 12720,
+    "MHT CET": 142,
+    "NEET": 2524,
+    "NEET UG": 125,
+    "RE-NEET": 180
+  },
+  "gradeableArchiveRecords": 22947,
+  "archiveRecordsStillFlaggedForMissingFigures": 29,
+  "archiveFigureAssets": 7170,
+  "licensedFigureAssets": 290,
+  "practiceRecords": 2319,
+  "knownOverlappingArchiveRecords": 987,
+  "canonicalArchiveQuestions": 22077,
+  "supplementalPdfSha256": {
+    "pdfs/2007-paper-1.pdf": "6ac8408e2d9d735159dbcff0461d9e673b01032a63fb32a1006e0c8d716b1cae",
+    "pdfs/2007-paper-2.pdf": "1149bf2e4d02eb46c1fdc89704bd611feae82fd7e8074c6f8a837a4a1f9d66a4",
+    "pdfs/2024-paper-1.pdf": "d0f3ffd739772b80a06f7c65e9b161905a314853e79e0ea3f3994aa7c2d5c525",
+    "pdfs/2024-paper-2.pdf": "2f01767b18f95ff9dd520879ae139afd0ea824d95c41f885db618db1f4326b4b"
+  },
+  "verifiedPacks": 26,
+  "status": "PASS"
+}
