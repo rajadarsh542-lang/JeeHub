@@ -1,0 +1,20 @@
+JEE Practice — licenses and acknowledgments
+
+Practice collection
+
+JEE Main Question Bank by eQOURSE is distributed under Creative Commons Attribution 4.0 International. The publisher provides questions, answer keys, worked explanations, and diagrams. This edition reformats the publisher’s material into searchable records, assigns identifiers, flags missing fields, and preserves available source answers. It retains the 290 published images with unambiguous mappings used by this edition. The images retain their original bytes in the Base64-encoded JSON packs listed in licensed/figures/index.json. That index records each original logical path and its SHA-256. The collection also includes three adaptations with reworded or re-typeset questions and choices, and new solutions and narration. See notices/practice-sources.tsv for the credit and original source record of every adaptation and dataset entry.
+
+Dataset: https://huggingface.co/datasets/eQOURSE/jee-main-questions
+Pinned edition: https://huggingface.co/datasets/eQOURSE/jee-main-questions/tree/16ebe036e04dfffffc0ae42717bf4fd5c0d25cf3
+License and disclaimer of warranties: https://creativecommons.org/licenses/by/4.0/
+Full legal text: https://creativecommons.org/licenses/by/4.0/legalcode.en
+
+The twelve PCM practice questions are original project material. The 362 supplemental explanations in authored/ were written for the project and are labeled separately from the source papers’ answers and explanations. Original answer options, published keys, and worked solutions from outside the project retain their respective provenance.
+
+Paper sources
+
+The catalog includes the PyqHub paper collection (https://jeehub.vercel.app/) and the JeeHub repository by Dhruv (https://github.com/dhruv-programmes/JeeHub). The original project’s MIT software license is preserved in notices/JeeHub-MIT.txt. Exam paper and publisher references are recorded in notices/archive-references.json.gz. Additional source information for the fifteen starter records and consulted references for supplemental worked solutions are in notices/practice-seed-credits.json and notices/authored-references.json. The CC BY 4.0 designation above applies to the identified eQOURSE collection.
+
+Typesetting and reader fonts
+
+KaTeX is distributed under the MIT license. See notices/KaTeX-MIT.txt and notices/KaTeX-fonts.txt for the software and fonts. MathJax SVG glyphs and their font credits, component license texts, and adaptation details are in notices/MathJax-*. Geist and Instrument Serif are distributed under the SIL Open Font License. Their complete copyright and license texts are in notices/Geist-OFL.txt and notices/Instrument-Serif-OFL.txt.
