@@ -1,0 +1,18 @@
+.licensed-note {
+  color: #63596d;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+.licensed-read-choice { cursor: default; }
+.licensed-read-choice:hover { border-color: #dedbe4; }
+.licensed-retained p { margin: 8px 0; white-space: pre-line; }
+#card:has(.licensed-stem) .solution li { white-space: pre-line; }
+#card:has(.licensed-stem) .stem,
+#card:has(.licensed-stem) .choice > span,
+#card:has(.licensed-stem) .solution,
+.licensed-retained { min-width: 0; overflow-x: auto; }
+#card .choice .katex { font-size: 1.12em; }
+#card .choice .katex span { font-size: inherit; white-space: normal; }
+#card figure img { max-width: 100%; height: auto; }

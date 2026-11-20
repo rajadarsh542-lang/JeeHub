@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eff6fb">
+  <meta name="referrer" content="no-referrer">
+  <title>Question bank · JEE Practice</title>
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/licensed.css">
+  <link rel="stylesheet" href="/assets/practice.css">
+  <script src="/assets/bank-files.js" defer></script>
+  <script src="/assets/practice-math.js" defer></script>
+  <script src="/assets/licensed.js" defer></script>
+  <script src="/assets/practice.js" defer></script>
+</head>
+<body>
+<a href="#exercise" class="skip-link">Skip to question</a>
+<svg class="symbols" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M3 4.5c3.2-.9 6-.3 9 1.5 3-1.8 5.8-2.4 9-1.5v13c-3.4-.7-6-.1-9 1.8-3-1.9-5.6-2.5-9-1.8zM12 6v13"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="3.8" cy="6" r=".65"/><circle cx="3.8" cy="12" r=".65"/><circle cx="3.8" cy="18" r=".65"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></symbol>
+    <symbol id="i-atom" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(52 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(-52 12 12)"/><circle cx="12" cy="12" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.1 18.3A1.8 1.8 0 0 0 5.6 21h12.8a1.8 1.8 0 0 0 1.5-2.7L14 9V3M7.5 14h9"/></symbol>
+    <symbol id="i-triangle" viewBox="0 0 24 24"><path d="M3 20 20 3v17H3Zm11 0v-6h6"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 7h4m4 0h10M3 17h10m4 0h4"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.5 12.5 4.5 4.5 8.5-10"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.8 4.8"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="4.5"/><path d="M12.5 12H21m-4 0v3m3-3v2"/></symbol>
+    <symbol id="i-scope" viewBox="0 0 24 24"><path d="M5 8V5h3m8 0h3v3m0 8v3h-3m-8 0H5v-3m4-4h6m-3-3v6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/></symbol>
+  </defs>
+</svg>
+<header class="masthead">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/" aria-label="JEE Practice home"><span class="brand-mark" aria-hidden="true"></span><span>JEE<span class="brand-light"> Practice</span></span></a>
+    <nav class="nav-actions" aria-label="Practice navigation">
+      <button class="browse-shortcut" id="jump-list" type="button"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Question list</button>
+      <button class="filter-toggle mobile-filter" id="mobile-filters" type="button" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>Date &amp; shift</button>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  <section class="hero" aria-labelledby="page-title">
+    <span class="hero-art" aria-hidden="true"></span>
+    <div class="hero-content">
+      <p class="hero-exam" id="hero-exam"><svg class="icon" aria-hidden="true"><use href="#i-scope"/></svg>Practice workspace</p>
+      <h1 id="page-title">Question bank<span>.</span></h1>
+      <div class="hero-stats" id="hero-stats" aria-live="polite"></div>
+    </div>
+  </section>
+  <section class="filter-panel panel" aria-label="Search and filter questions">
+    <div class="exam-row">
+      <div class="exam-group"><span class="group-title">Exam</span><div id="exams" class="exam-tabs" role="group" aria-label="Filter by exam"></div></div>
+      <button class="filter-toggle" id="open-filters" type="button" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>Date &amp; shift<span id="filter-count" hidden></span></button>
+    </div>
+    <div class="toolbar"><span class="group-title">Subject</span><div class="subject-nav" id="subjects" role="group" aria-label="Filter by subject"></div></div>
+    <div class="catalog-bar">
+      <div class="bank-search"><label for="bank-search">Search the bank</label><div class="search-control"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="bank-search" placeholder="Topic, paper, year or question ID" autocomplete="off"></div></div>
+      <div class="bank-collection"><label for="collection">Collection</label><select id="collection"><option value="all">All questions</option><option value="practice">Practice sets</option><option value="archive">All exam papers</option><option value="papers">Core exam papers</option></select></div>
+      <div class="learning-fields" id="learning-fields"></div>
+    </div>
+  </section>
+  <p id="catalog-status" role="status" hidden></p>
+  <div class="workspace">
+    <section class="exercise panel" aria-label="Current question" id="exercise" tabindex="-1">
+      <div class="notice" id="notice" role="status">Loading questions…</div>
+      <article id="card" hidden></article>
+    </section>
+    <aside class="queue panel" aria-label="Browse the question bank" id="queue">
+      <details id="browse" open>
+        <summary class="queue-head"><span><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Question navigator</span><span id="count" aria-live="polite">…</span></summary>
+        <nav id="list" aria-label="Matching questions"></nav>
+        <div class="list-pager" id="list-pager" hidden><button id="list-prev" type="button" aria-label="Previous page" class="icon-btn">‹</button><span id="list-range" aria-live="polite"></span><button id="list-next" type="button" aria-label="Next page" class="icon-btn">›</button></div>
+      </details>
+    </aside>
+  </div>
+</main>
+<dialog id="filter-dialog" aria-labelledby="filter-title">
+  <div class="dialog-head"><h2 id="filter-title">Filter questions</h2><button type="button" id="close-filters" class="icon-btn" aria-label="Close filters"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+  <div id="fields" class="fields"></div>
+  <div class="dialog-actions"><button class="text-button" id="clear" type="button">Clear filters</button><button class="primary" id="apply-filters" type="button">Show questions</button></div>
+</dialog>
+<footer class="wrap bank-footer"><a id="bank-notices" hidden target="_blank" rel="noopener noreferrer">Licenses and acknowledgments</a></footer>
+</body>
+</html>
