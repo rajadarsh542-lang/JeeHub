@@ -76,6 +76,7 @@ def verify():
         "archiveRecordsByExam": dict(sorted(Counter(catalog["papers"][q[0]]["exam"] for q in search["rows"]).items())),
         "gradeableArchiveRecords": sum(bool(q["gradeable"]) for q in questions.values()),
         "archiveRecordsStillFlaggedForMissingFigures": sum(any("figures are unavailable" in n for n in q["notices"]) for q in questions.values()),
+        "archiveRecordsWithSolutionFigureWarnings": sum("Some source figures in the worked solution are unavailable." in q["solutionHtml"] for q in questions.values()),
         "archiveFigureAssets": len(manifest["assets"]) - 1,
         "licensedFigureAssets": len(figures["files"]),
         "practiceRecords": len(licensed) + len(read("questions.json")),
