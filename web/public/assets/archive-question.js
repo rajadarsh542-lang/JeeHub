@@ -1,5 +1,6 @@
 /* Render a normalized question, its worked material and saved figures from the released bank. */
 import {getQuestion,getAsset} from "./hosted-bank.js";
+import {baselineMathText,exposeArchiveMath} from "./archive-math.js";
 let glyphJob;
   const safeTags = new Set(("article section figure figcaption p br div span sub sup strong b em i u s mark small ol ul li table tbody thead tfoot tr td th blockquote pre code hr h2 h3 h4 h5 center a img details summary math semantics mrow mi mn mo ms mtext mfrac msup msub msubsup msqrt mroot mtable mtr mtd mstyle mspace mover munder munderover mmultiscripts mprescripts none mpadded menclose mphantom mfenced mjx-container svg g path use defs rect line polygon polyline circle ellipse title desc").split(" "));
   const geom=new Set("viewbox width height x y x1 x2 y1 y2 cx cy r rx ry points d transform fill stroke stroke-width stroke-linecap stroke-linejoin fill-rule preserveaspectratio".split(" "));
@@ -29,6 +30,9 @@ let glyphJob;
     const root=elem("div",null,"personal-rich");
     // Template contents are inert. Remove everything except the reader's display vocabulary before insertion.
     const t=document.createElement("template");t.innerHTML=html||"";
+    // Inspect the original shape before sanitization removes untrusted attributes.
+    // A removed transform/style must never turn an ambiguous drawing into text.
+    const mathRuns=new Map([...t.content.querySelectorAll("mjx-container")].map(node=>[node,baselineMathText(node)]));
     for(const node of [...t.content.querySelectorAll("*")]){
       const tag=node.localName.toLowerCase();
       if(!safeTags.has(tag)){node.remove();continue;}
@@ -55,6 +59,7 @@ let glyphJob;
       // Archived links are outside the practice flow. A plain label may still be part of an exam stimulus.
       if(tag==="a")node.replaceWith(...node.childNodes);
     }
+    for(const [node,text] of mathRuns)if(t.content.contains(node))exposeArchiveMath(node,text);
     root.append(t.content);
     return root;
   }
@@ -98,6 +103,12 @@ function addAttempt(root,q){
   }
   if(inputs.length||q.options?.length)root.append(fields);
   const actions=elem("div",null,"actions"),verdict=elem("p");verdict.id="verdict";verdict.setAttribute("role","status");
+  function invalidateAttempt(){
+    if(!verdict.textContent)return;
+    verdict.className="";verdict.textContent="Answer changed — check again.";
+  }
+  fields.addEventListener("input",invalidateAttempt);
+  fields.addEventListener("change",invalidateAttempt);
   const solution=elem("section",null,"solution archived-solution");solution.id="solution";solution.hidden=true;
   const reveal=elem("button","Show solution","secondary");reveal.type="button";reveal.setAttribute("aria-controls","solution");reveal.setAttribute("aria-expanded","false");
   function showSolution(open){

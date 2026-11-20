@@ -212,6 +212,7 @@ dialog::backdrop { background: #10243970; backdrop-filter: blur(3px) }
 .personal-rich { min-width: 0; overflow-x: auto; line-height: 1.65; scrollbar-width: thin }
 .personal-rich p+p { margin-top: .5em }
 .personal-rich svg { max-width: 100%; vertical-align: middle }
+.archive-math-text { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
 .personal-rich table { border-collapse: collapse }
 .personal-rich th,.personal-rich td { padding: 4px 7px; border: 1px solid var(--edge) }
 .personal-rich ul,.personal-rich ol { padding-left: 22px }

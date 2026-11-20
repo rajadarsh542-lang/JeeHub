@@ -464,6 +464,12 @@ function showAttempt(card,q) {
   submit.prepend(icon("check"));
   reveal.prepend(icon("book"));
   const verdict=make("p"); verdict.id="verdict"; verdict.setAttribute("role","status");
+  function invalidateAttempt() {
+    if (!verdict.textContent) return;
+    verdict.className=""; verdict.textContent="Answer changed — check again.";
+  }
+  fields.addEventListener("input",invalidateAttempt);
+  fields.addEventListener("change",invalidateAttempt);
   const solution=make("section",undefined,"solution"); solution.hidden=true; solution.id="solution";
   reveal.setAttribute("aria-controls","solution"); reveal.setAttribute("aria-expanded","false");
   const labels=q.answer.map(a=> {
