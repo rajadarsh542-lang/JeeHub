@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#eff6fb">
+  <meta name="theme-color" content="#f8fafc">
   <meta name="referrer" content="no-referrer">
   <title>Question bank · JEE Practice</title>
   <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
@@ -12,6 +12,7 @@
   <script src="/assets/bank-files.js" defer></script>
   <script src="/assets/practice-math.js" defer></script>
   <script src="/assets/licensed.js" defer></script>
+  <script src="/assets/question-experience.js" defer></script>
   <script src="/assets/practice.js" defer></script>
 </head>
 <body>
@@ -39,32 +40,22 @@
 <header class="masthead">
   <div class="wrap nav-inner">
     <a class="brand" href="/" aria-label="JEE Practice home"><span class="brand-mark" aria-hidden="true"></span><span>JEE<span class="brand-light"> Practice</span></span></a>
+    <nav class="view-switches" aria-label="Practice views"><a class="nav-bank" href="/" aria-current="page">Bank</a></nav>
     <nav class="nav-actions" aria-label="Practice navigation">
-      <button class="browse-shortcut" id="jump-list" type="button"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Question list</button>
-      <button class="filter-toggle mobile-filter" id="mobile-filters" type="button" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>Date &amp; shift</button>
+      <button class="browse-shortcut" id="jump-list" type="button" aria-label="Open question navigator"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span>Questions</span></button>
+      <button class="filter-toggle" id="open-filters" type="button" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>Filters<span id="filter-count" hidden></span></button>
+      <button id="mobile-filters" type="button" hidden aria-haspopup="dialog">Filters</button>
+      <a id="channel-link" class="channel-link" hidden target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/></svg><span>YouTube</span></a>
     </nav>
   </div>
 </header>
 <main class="wrap">
-  <section class="hero" aria-labelledby="page-title">
-    <span class="hero-art" aria-hidden="true"></span>
-    <div class="hero-content">
-      <p class="hero-exam" id="hero-exam"><svg class="icon" aria-hidden="true"><use href="#i-scope"/></svg>Practice workspace</p>
-      <h1 id="page-title">Question bank<span>.</span></h1>
-      <div class="hero-stats" id="hero-stats" aria-live="polite"></div>
-    </div>
-  </section>
-  <section class="filter-panel panel" aria-label="Search and filter questions">
-    <div class="exam-row">
-      <div class="exam-group"><span class="group-title">Exam</span><div id="exams" class="exam-tabs" role="group" aria-label="Filter by exam"></div></div>
-      <button class="filter-toggle" id="open-filters" type="button" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>Date &amp; shift<span id="filter-count" hidden></span></button>
-    </div>
-    <div class="toolbar"><span class="group-title">Subject</span><div class="subject-nav" id="subjects" role="group" aria-label="Filter by subject"></div></div>
-    <div class="catalog-bar">
-      <div class="bank-search"><label for="bank-search">Search the bank</label><div class="search-control"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="bank-search" placeholder="Topic, paper, year or question ID" autocomplete="off"></div></div>
-      <div class="bank-collection"><label for="collection">Collection</label><select id="collection"><option value="all">All questions</option><option value="practice">Practice sets</option><option value="archive">All exam papers</option><option value="papers">Core exam papers</option></select></div>
-      <div class="learning-fields" id="learning-fields"></div>
-    </div>
+  <h1 id="page-title" class="sr-only">Question bank</h1>
+  <div id="hero-stats" hidden></div>
+  <section class="filter-panel" aria-label="Search and filter questions">
+    <div class="filter-field"><label for="exams">Exam</label><select id="exams" aria-label="Exam"><option value="">All exams</option></select></div>
+    <div class="filter-field"><label for="subjects">Subject</label><select id="subjects" aria-label="Subject"><option value="">All subjects</option></select></div>
+    <div class="filter-field collection-field"><label for="collection">Collection</label><select id="collection"><option value="all">All questions</option><option value="practice">Practice sets</option><option value="archive">All exam papers</option><option value="papers">Core exam papers</option></select></div>
   </section>
   <p id="catalog-status" role="status" hidden></p>
   <div class="workspace">
@@ -75,7 +66,10 @@
     <aside class="queue panel" aria-label="Browse the question bank" id="queue">
       <details id="browse" open>
         <summary class="queue-head"><span><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Question navigator</span><span id="count" aria-live="polite">…</span></summary>
+        <p class="queue-subtitle">Choose a question to keep practising.</p>
         <nav id="list" aria-label="Matching questions"></nav>
+        <p id="progress-summary" class="progress-summary">0 answered · saved on this device</p>
+        <div class="navigator-legend" aria-label="Question status legend"><span><i class="legend-box" aria-hidden="true"></i>Unattempted</span><span><i class="legend-box correct" aria-hidden="true"></i>Correct</span><span><i class="legend-box incorrect" aria-hidden="true"></i>Incorrect</span><span><i class="legend-box flagged" aria-hidden="true"></i>Flagged</span></div>
         <div class="list-pager" id="list-pager" hidden><button id="list-prev" type="button" aria-label="Previous page" class="icon-btn">‹</button><span id="list-range" aria-live="polite"></span><button id="list-next" type="button" aria-label="Next page" class="icon-btn">›</button></div>
       </details>
     </aside>
@@ -83,6 +77,8 @@
 </main>
 <dialog id="filter-dialog" aria-labelledby="filter-title">
   <div class="dialog-head"><h2 id="filter-title">Filter questions</h2><button type="button" id="close-filters" class="icon-btn" aria-label="Close filters"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+  <div class="bank-search"><label for="bank-search">Search the bank</label><div class="search-control"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="bank-search" placeholder="Topic, paper, year or question ID" autocomplete="off"></div></div>
+  <div class="learning-fields" id="learning-fields"></div>
   <div id="fields" class="fields"></div>
   <div class="dialog-actions"><button class="text-button" id="clear" type="button">Clear filters</button><button class="primary" id="apply-filters" type="button">Show questions</button></div>
 </dialog>

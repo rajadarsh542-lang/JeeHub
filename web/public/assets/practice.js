@@ -20,7 +20,7 @@ const selects = new Map();
 let bank = [], shown = [], archiveRows = [], archivePapers = [], referencePapers = [];
 let currentId = "", activeRecord = null, renderVersion = 0;
 const recordById = new Map(), shards = new Map();
-const pageSize = 25, prettyNumber = n=>Number(n).toLocaleString("en-IN");
+const pageSize = 30, prettyNumber = n=>Number(n).toLocaleString("en-IN");
 
 function labelValue(raw) {
   if(raw==null) return "";
@@ -118,41 +118,66 @@ function focusExercise() {
   }
 }
 const primaryExams = ["JEE Main","JEE Advanced"];
-function buildExamNav(){
-  const nav=byId("exams");if(!nav)return;
-  nav.replaceChildren();
-  for(const exam of ["",...primaryExams]){
-    const tab=button(exam||"All exams","exam-tab",()=>chooseExam(exam));
-    tab.dataset.exam=exam;
-    nav.append(tab);
-  }
-  const others=[...new Set(bank.map(row=>row.exam).filter(x=>x&&!primaryExams.includes(x)))].sort(collator.compare);
-  if(others.length){
-    const select=make("select");select.id="other-exams";select.setAttribute("aria-label","Other exams");
-    select.add(new Option("Other exams",""));
-    for(const exam of others)select.add(new Option(exam,exam));
-    select.onchange=()=>{if(select.value)chooseExam(select.value);};
-    nav.append(select);
-  }
-}
-function buildSubjectNav() {
-  const values = new Set(bank.map(q=>facetValue(q,"subject")).filter(Boolean));
-  const subjects = ["", ...Object.keys(subjectIcons).filter(name=>values.has(name)),
-    ...[...values].filter(name=>!(name in subjectIcons)).sort(collator.compare)];
-  for(const subject of subjects){
-    const tab=button(null,"subject-tab",()=>changeFacet("subject",subject));
-    tab.dataset.subject=subject;tab.append(icon(subjectIcons[subject]||"grid"),subject||"All subjects");
-    byId("subjects").append(tab);
-  }
-  const stats=[[bank.length-archiveRows.length,"practice questions"],[archiveRows.length,"exam questions"],[archivePapers.length,"paper sets"]];
-  byId("hero-stats").replaceChildren(...stats.map(([n,label])=>{
-    const item=make("span");item.append(make("strong",prettyNumber(n))," "+label);return item;
-  }));
-}
+function buildExamNav(){ byId("exams").onchange=()=>chooseExam(byId("exams").value); }
+function buildSubjectNav() { byId("subjects").onchange=()=>changeFacet("subject",byId("subjects").value); }
 function showFilterCount() {
-  const count=[...selects.values()].filter(select=>select.value).length;
-  byId("filter-count").textContent=count;byId("filter-count").hidden=!count;
-  for(const id of ["open-filters","mobile-filters"])byId(id).setAttribute("aria-label",count?"Date, shift and other filters, "+count+" active":"Date, shift and other filters");
+  const count=[...selects.values()].filter(select=>select.value).length
+    + Number(byId("collection").value!=="all") + Number(Boolean(byId("bank-search").value.trim()));
+  byId("filter-count").textContent="("+count+")";byId("filter-count").hidden=!count;
+  for(const id of ["open-filters","mobile-filters"])byId(id)?.setAttribute("aria-label",count?"Filters, "+count+" active":"Filters");
+}
+const progressKey="jee-practice-progress-v1";
+let progress={};
+try {
+  const saved=JSON.parse(localStorage.getItem(progressKey)||"{}");
+  if(saved && typeof saved==="object" && !Array.isArray(saved)) {
+    for(const [id,value] of Object.entries(saved).slice(-5000)) {
+      if(value && typeof value==="object")progress[id]={status:["correct","incorrect"].includes(value.status)?value.status:"unattempted",flagged:value.flagged===true};
+    }
+  }
+} catch { /* Practice still works when storage is unavailable. */ }
+function saveProgress(id,patch) {
+  progress[id]={status:"unattempted",flagged:false,...progress[id],...patch};
+  const entries=Object.entries(progress);if(entries.length>5000)progress=Object.fromEntries(entries.slice(-5000));
+  try {localStorage.setItem(progressKey,JSON.stringify(progress));} catch {}
+  refreshProgress();
+}
+function refreshProgress() {
+  for(const row of byId("list").querySelectorAll("[data-question-id]")) {
+    const state=progress[row.dataset.questionId]||{},current=row.getAttribute("aria-current")==="true";
+    row.classList.toggle("status-correct",state.status==="correct");
+    row.classList.toggle("status-incorrect",state.status==="incorrect");
+    row.classList.toggle("flagged",Boolean(state.flagged));row.classList.toggle("current",current);
+    const status=state.status==="correct"?"Correct":state.status==="incorrect"?"Incorrect":"Unattempted";
+    row.setAttribute("aria-label",row.dataset.questionLabel+". "+status+(state.flagged?". Flagged":"")+(current?". Current question":""));
+    row.title=row.getAttribute("aria-label");
+    let marker=row.querySelector(".status-marker");
+    if(!marker){marker=make("span",null,"status-marker");marker.setAttribute("aria-hidden","true");row.append(marker);}
+    marker.textContent=state.flagged?"⚑":state.status==="correct"?"✓":state.status==="incorrect"?"×":"";
+  }
+  const flag=byId("flag-question");
+  if(flag&&activeRecord){const marked=!!progress[activeRecord.id]?.flagged;flag.setAttribute("aria-pressed",String(marked));flag.textContent=marked?"Flagged":"Flag question";}
+  const summary=byId("progress-summary");
+  if(summary){const answered=shown.filter(q=>["correct","incorrect"].includes(progress[q.id]?.status)).length;summary.textContent=prettyNumber(answered)+" answered · saved on this device";}
+}
+document.addEventListener("question-attempt",event=>{
+  const {id,status}=event.detail||{};
+  if(typeof id==="string" && ["correct","incorrect","unattempted"].includes(status))saveProgress(id,{status});
+});
+function questionType(q){
+  const type=String(q.format||q.type||"").toLowerCase();
+  if(/numer|integer/.test(type))return "Numerical";
+  if(/multiple|multi|more/.test(type))return "Multiple choice";
+  return type?"Single choice":"Practice";
+}
+function addQuestionFooter(card,q,index){
+  const footer=make("div",null,"question-footer");
+  const prev=button("Previous","secondary",()=>{if(shown[index-1]){go(shown[index-1].id);focusExercise();}});
+  prev.disabled=!shown[index-1];prev.setAttribute("aria-label","Previous question");
+  const flag=button("Flag question","secondary flag-button",()=>saveProgress(q.id,{flagged:!progress[q.id]?.flagged}));flag.id="flag-question";
+  const next=button("Skip / Next","secondary",()=>{if(shown[index+1]){go(shown[index+1].id);focusExercise();}});
+  next.disabled=!shown[index+1];next.setAttribute("aria-label","Next question");
+  footer.append(prev,flag,next);card.append(footer);refreshProgress();
 }
 const pageId = () => {
   try {return decodeURIComponent(location.pathname.split("/")[2] || "");}
@@ -244,16 +269,6 @@ function updateSelect(key,rows,desired,prompt=""){
   const label=prompt||(options.length?"All "+plurals[key]:"No recorded "+facets[key].toLowerCase());
   fillSelect(selects.get(key),options,selected,label,key);
   if(mirrorSelects.has(key))fillSelect(mirrorSelects.get(key),options,selected,label,key);
-  if(key==="subject"){
-    for(const tab of byId("subjects").querySelectorAll("[data-subject]")){
-      const subject=tab.dataset.subject;tab.hidden=!!subject&&!distinct.has(subject);
-      tab.setAttribute("aria-pressed",String(subject===selected));
-    }
-  }
-  if(key==="exam"){
-    for(const tab of byId("exams")?.querySelectorAll("[data-exam]")||[])tab.setAttribute("aria-pressed",String(tab.dataset.exam===selected));
-    const other=byId("other-exams");if(other){other.value=primaryExams.includes(selected)?"":selected;other.dataset.active=String(Boolean(other.value));}
-  }
   return selected;
 }
 function refreshFacets(desired,changed){
@@ -296,16 +311,15 @@ function changeFacet(key,value){
   refreshFacets(requested,key);go("");
 }
 function buildFilters() {
-  const inline=byId("learning-fields");inline?.replaceChildren();mirrorSelects.clear();
+  const learning=byId("learning-fields");learning?.replaceChildren();mirrorSelects.clear();
   for(const [key,name] of Object.entries(facets)){
-    const primary=make("select"), label=make("label",name);
-    primary.id="facet-"+key;primary.onchange=()=>changeFacet(key,primary.value);
-    selects.set(key,primary);label.append(primary);byId("fields").append(label);
-    if(inline && ["chapter","topic"].includes(key)){
-      const control=make("select"), field=make("label",name);
-      control.id="inline-"+key;control.onchange=()=>changeFacet(key,control.value);
-      mirrorSelects.set(key,control);field.append(control);inline.append(field);
+    if(["exam","subject"].includes(key)) {
+      selects.set(key,byId(key==="exam"?"exams":"subjects"));continue;
     }
+    const primary=make("select"),label=make("label",name);
+    primary.id="facet-"+key;primary.onchange=()=>changeFacet(key,primary.value);
+    selects.set(key,primary);label.append(primary);
+    (learning&&["chapter","topic"].includes(key)?learning:byId("fields")).append(label);
   }
 }
 function bankLink(logicalPath,label){
@@ -336,7 +350,7 @@ function render() {
   const index = q ? shown.indexOf(q) : 0;
   const first=Math.floor(index/pageSize)*pageSize, end=Math.min(first+pageSize,shown.length);
   byId("list-pager").hidden=shown.length<=pageSize;
-  byId("list-range").textContent=prettyNumber(first+1)+"–"+prettyNumber(end)+" of "+prettyNumber(shown.length);
+  byId("list-range").textContent=prettyNumber(shown.length?first+1:0)+"–"+prettyNumber(end)+" of "+prettyNumber(shown.length);
   byId("list-prev").disabled=first===0;byId("list-next").disabled=end===shown.length;
   byId("list-prev").onclick=()=>go(shown[Math.max(0,first-pageSize)].id);
   byId("list-next").onclick=()=>{if(end<shown.length)go(shown[end].id);};
@@ -349,6 +363,7 @@ function render() {
       focusExercise();
     });
     row.setAttribute("aria-current",String(item.id===q?.id));
+    row.dataset.questionId=item.id;row.dataset.questionLabel="Question "+(i+1)+": "+recordTitle(item);
     const num = make("span",String(i+1).padStart(2,"0"),"row-num");
     num.setAttribute("aria-hidden","true");
     const copy = make("span",undefined,"row-copy");
@@ -356,6 +371,7 @@ function render() {
     row.append(num,copy);
     list.append(row);
   });
+  refreshProgress();
   const activeRow = list.querySelector('[aria-current="true"]');
   if (activeRow && byId("browse").open) {
     const rowBounds = activeRow.getBoundingClientRect();
@@ -390,25 +406,16 @@ function render() {
   badge.dataset.subject=q.subject;
   badge.append(icon(subjectIcons[q.subject] || "layers"),q.subject);
   category.append(badge);
-  if(q.chapter) category.append(icon("right"),make("span",q.chapter,"category-text"));
-
-  const pager = make("div",undefined,"pager");
-  const position=make("span",String(index+1).padStart(2,"0")+" / "+prettyNumber(shown.length),"page-index");
-  position.setAttribute("aria-label","Question "+(index+1)+" of "+shown.length);
-  pager.append(position);
-  for (const [delta,direction] of [[-1,"Previous"],[1,"Next"]]) {
-    const adjacent=shown[index+delta];
-    const step=button(null,"icon-btn",()=>{if(adjacent)go(adjacent.id);});
-    step.disabled=!adjacent;
-    step.setAttribute("aria-label",direction+" question");
-    step.title=direction+" question";
-    step.append(icon(delta<0?"left":"right"));
-    pager.append(step);
-  }
+  if(q.exam) category.append(make("span",[q.exam,q.year].filter(Boolean).join(" · "),"meta-pill"));
+  if(q.chapter) category.append(make("span",q.chapter,"meta-pill chapter-pill"));
+  category.append(make("span",questionType(q),"meta-pill type-pill"));
+  const pager=make("div",null,"pager");
+  const position=make("span",prettyNumber(index+1)+" / "+prettyNumber(shown.length),"page-index");
+  position.setAttribute("aria-label","Question "+(index+1)+" of "+shown.length);pager.append(position);
   top.append(category,pager);
   const heading=make("h2",recordTitle(q));
   card.replaceChildren(top,heading);
-  if(q.archive){showArchiveCard(card,q,version);return;}
+  if(q.archive){showArchiveCard(card,q,version);addQuestionFooter(card,q,index);return;}
   if(q.licensedArchive){
     const loading=make("p","Loading question…","archive-help");card.append(loading);
     window.LicensedPractice.load(q).then(full=>{
@@ -416,6 +423,8 @@ function render() {
       loading.remove();card.append(make("p",full.stem,"stem"));
       window.LicensedPractice.renderAttempt(card,full,showAttempt);
       window.LicensedPractice.typeset(card);
+      card.querySelector(".type-pill").textContent=questionType(full);
+      window.QuestionExperience?.attach(card,full);addQuestionFooter(card,q,index);
     }).catch(()=>{if(version===renderVersion)loading.textContent="This practice question could not be loaded. Reload to try again.";});
     return;
   }
@@ -427,6 +436,7 @@ function render() {
     img.src=window.BankFiles.url(asset.path);img.alt=asset.alt||"Question figure";figure.append(img);card.append(figure);
   }
   showAttempt(card,q);
+  window.QuestionExperience?.attach(card,q);addQuestionFooter(card,q,index);
 }
 function normalNumber(value) {
   const s = String(value).trim().replace(/^−/,"-");
@@ -465,6 +475,8 @@ function showAttempt(card,q) {
   reveal.prepend(icon("book"));
   const verdict=make("p"); verdict.id="verdict"; verdict.setAttribute("role","status");
   function invalidateAttempt() {
+    window.QuestionExperience?.clearAnswerFeedback(fields);
+    window.QuestionExperience?.reportAttempt(q.id,"unattempted");
     if (!verdict.textContent) return;
     verdict.className=""; verdict.textContent="Answer changed — check again.";
   }
@@ -478,6 +490,7 @@ function showAttempt(card,q) {
   });
   solution.append(make("h3","Worked solution"),make("p","Answer: "+labels.join(numerical ? " or " : ", ")));
   const ol=make("ol"); for (const step of q.solution_steps) ol.append(make("li",step)); solution.append(ol);
+  window.QuestionExperience?.decorateSolution(solution,q.id);
   function openSolution() {
     solution.hidden=false; reveal.replaceChildren(icon("book"),"Hide solution"); reveal.setAttribute("aria-expanded","true");
   }
@@ -487,14 +500,14 @@ function showAttempt(card,q) {
     if (!values.length) {verdict.className="";verdict.textContent=numerical ? "Enter a number first." : "Choose an option first.";return;}
     if (numerical && normalNumber(values[0])===null) {verdict.className="";verdict.textContent="Enter a decimal number. Scientific notation is also accepted.";return;}
     const right=numerical ? q.answer.some(a=>normalNumber(a)===normalNumber(values[0])) : values.length===q.answer.length && values.every(v=>q.answer.includes(v));
+    window.QuestionExperience?.markAnswers(fields,q.answer,{numerical,correct:right});
+    window.QuestionExperience?.reportAttempt(q.id,right?"correct":"incorrect");
     verdict.className=right ? "correct" : "incorrect"; verdict.textContent=right ? "Correct." : "That answer is incorrect."; openSolution();
   };
-  actions.append(submit,reveal); card.append(fields,actions,verdict,solution);
-  const peers=sameTopic(q,shown);
-  if (peers.length>1) {
-    const next=make("button","Next question on this topic","secondary follow");next.type="button";next.append(icon("arrow"));
-    next.onclick=()=>go(nextPeer(q,peers).id);card.append(next);
-  }
+  const hintHost=make("div",null,"hint-host");
+  actions.append(submit);window.QuestionExperience?.addHints(actions,hintHost,q.id);actions.append(reveal);
+  card.append(fields,actions,hintHost,verdict,solution);
+
 }
 byId("jump-list").onclick=()=>{
   const browse=byId("browse");
@@ -542,6 +555,7 @@ async function showArchiveCard(card,q,version){
       const {renderArchivedQuestion,findTextQuestion}=await import("/assets/archive-question.js");
       if(version!==renderVersion||!wrap.isConnected)return;
       const state=await renderArchivedQuestion(mount,q.id);
+      if(version===renderVersion&&state?.format)card.querySelector(".type-pill").textContent=questionType({format:state.format});
       if(state?.missingPrompt&&version===renderVersion){
         const peers=shown.filter(row=>row.archive&&row.paperIndex===q.paperIndex);
         const index=peers.findIndex(row=>row.id===q.id);

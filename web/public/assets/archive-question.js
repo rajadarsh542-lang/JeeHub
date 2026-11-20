@@ -104,6 +104,8 @@ function addAttempt(root,q){
   if(inputs.length||q.options?.length)root.append(fields);
   const actions=elem("div",null,"actions"),verdict=elem("p");verdict.id="verdict";verdict.setAttribute("role","status");
   function invalidateAttempt(){
+    window.QuestionExperience?.clearAnswerFeedback(fields);
+    window.QuestionExperience?.reportAttempt(q.id,"unattempted");
     if(!verdict.textContent)return;
     verdict.className="";verdict.textContent="Answer changed — check again.";
   }
@@ -115,6 +117,8 @@ function addAttempt(root,q){
     if(open&&!solution.childElementCount){
       solution.append(elem("h3","Answer"),material(q.answerHtml||"An answer key is unavailable."),elem("h3","Worked solution"),material(q.solutionHtml||"A worked solution is unavailable."));
       hydrate(solution);
+      window.QuestionExperience?.decorateSolution(solution,q.id);
+      window.QuestionExperience?.attach(solution,q);
     }
     solution.hidden=!open;reveal.textContent=open?"Hide solution":"Show solution";reveal.setAttribute("aria-expanded",String(open));
   }
@@ -132,10 +136,17 @@ function addAttempt(root,q){
         if(!answer.length){verdict.className="";verdict.textContent="Choose an option first.";return;}
         correct=answer.length===q.answer.length&&answer.every(val=>q.answer.includes(val));
       }
-      verdict.className=correct?"correct":"incorrect";verdict.textContent=correct?"Correct.":"That answer is incorrect.";showSolution(true);
+      verdict.className=correct?"correct":"incorrect";verdict.textContent=correct?"Correct.":"That answer is incorrect.";
+      window.QuestionExperience?.markAnswers(fields,q.answer,{numerical:numeric,correct});
+      window.QuestionExperience?.reportAttempt(q.id,correct?"correct":"incorrect");
+      showSolution(true);
     };
   }
-  actions.append(reveal);root.append(actions,verdict,solution);
+  const hintHost=elem("div",null,"hint-host");
+  window.QuestionExperience?.addHints(actions,hintHost,q.id);
+  actions.append(reveal);root.append(actions);
+  if(window.QuestionExperience)root.append(hintHost);
+  root.append(verdict,solution);
 }
 function needsQuestionFigure(q){
   return [q.stemHtml,...(q.options||[]).map(o=>o.html)].some(html=>/<img\b/i.test(html)) ||
@@ -159,5 +170,6 @@ export async function renderArchivedQuestion(root,id){
   const missingPrompt=window.BankFiles.textOnly&&needsQuestionFigure(q);
   if(missingPrompt)root.append(elem("p","This question uses a figure. You can review its answer and worked solution below.","archive-note"));
   addAttempt(root,missingPrompt?{...q,gradeable:false}:q);hydrate(root);
-  return {missingPrompt};
+  window.QuestionExperience?.attach(root,q);
+  return {missingPrompt,format:q.format};
 }

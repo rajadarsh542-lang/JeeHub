@@ -83,7 +83,7 @@ window.LicensedPractice = (() => {
         details.append(figure);
         const unavailable = () => img.replaceWith(node("figcaption", label + " is unavailable."));
         img.onerror = unavailable;
-        figureData(path).then(src => { if (img.isConnected) img.src = src; }).catch(unavailable);
+        figureData(path).then(src => { if (img.isConnected) { img.src = src; window.QuestionExperience?.attach(figure); } }).catch(unavailable);
       });
     });
     host.append(details);

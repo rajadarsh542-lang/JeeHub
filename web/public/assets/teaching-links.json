@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "channelUrl": "",
+  "questions": {
+    "eqourse-c-01": {
+      "reviewed": true,
+      "reviewNote": "Checked against the allowed ranges of n, l, m_l and m_s; stored key C agrees.",
+      "hints": [
+        "Start with the allowed orbital quantum numbers for a given principal quantum number n.",
+        "The orbital quantum number l must be an integer from 0 to n - 1. For n = 3, compare each option with that range."
+      ],
+      "takeaway": "Check the quantum-number ranges in order. A tuple is forbidden as soon as one value breaks its allowed range, even if the remaining values look valid."
+    },
+    "pcm-c-03": {
+      "reviewed": true,
+      "reviewNote": "Independently checked Q/F = 0.040 mol electrons; Ni2+ requires two electrons; theoretical mass 1.18 g; efficiency 80%.",
+      "hints": [
+        "First calculate the mass of nickel that the charge would deposit if every electron contributed to nickel plating.",
+        "Each Ni2+ ion needs two electrons. Use theoretical mass = Q x M / (2F), then compare actual mass with theoretical mass."
+      ],
+      "takeaway": "Current efficiency compares the actual deposited mass with the theoretical mass from Faraday's law. Account for the two electrons needed by each Ni2+ ion before calculating the percentage."
+    }
+  }
+}
